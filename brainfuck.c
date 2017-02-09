@@ -6,57 +6,70 @@
 /*   By: ttshivhu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/02/09 07:09:00 by ttshivhu          #+#    #+#             */
-/*   Updated: 2017/02/09 07:39:06 by ttshivhu         ###   ########.fr       */
+/*   Updated: 2017/02/09 12:48:37 by ttshivhu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 
-void	brainfuck_interpreter(const char* instruction, const size_t cnt)
+void	brainfuck_interpreter(char *inst)
 {
-	char* tshilidzi = calloc(cnt,1);
-	char* ptr = &tshilidzi[0];
+	char *tshilidzi = (char *)malloc(sizeof(inst));
+	char *ptr = tshilidzi;
+
+	int index = 0; 
 	
-	for (;*instruction != '\0'; ++instruction)
+	while(ptr[index])
 	{
-		switch (*instruction)
+		ptr[index++] = 0;
+	}
+
+	while (*inst != '\0')
+	{
+		if (*inst == '>')
+			++ptr;
+		else if (*inst == '<')
+			--ptr;
+		else if (*inst == '+')
+			++*ptr;
+		else if (*inst == '-')
+			--*ptr;
+		else if (*inst == '.')
+			write(1, ptr, 1);
+		else if (*inst == ',')
+			read(0, ptr, 1);
+		else if (*inst == '[')
 		{
-			case '>': ++ptr; break;
-			case '<': --ptr; break;
-			case '+': ++*ptr; break;
-			case '-': --*ptr; break;
-			case '.': printf("%c", *ptr); break;
-			case ',': *ptr = getchar(); break;
-			case '[':
-					  if (!*ptr)
-					  {
-						  size_t loop_cnt = 1;
-						  while (loop_cnt)
-						  {
-							  ++instruction;
-							  if (*instruction == ']')
-								  --loop_cnt;
-							  else if (*instruction == '[')
-								  ++loop_cnt;
-						  }
-					  }
-					  break;
-			case ']':
-					  if (*ptr)
-					  {
-						  size_t loop_cnt = 1;
-						  while (loop_cnt)
-						  {
-							  --instruction;
-							  if (*instruction == '[')
-								  --loop_cnt;
-							  else if (*instruction == ']')
-								  ++loop_cnt;
-						  }
-					  }
-					  break;
+			if (!*ptr)
+			{
+				int loop_cnt = 1;
+				while (loop_cnt)
+				{
+					++inst;
+					if (*inst == ']')
+						--loop_cnt;
+					else if (*inst == '[')
+						++loop_cnt;
+				}
+			}
+			}
+		else if (*inst == ']')
+		{
+			if (*ptr)
+			{
+				int loop_cnt = 1;
+				while (loop_cnt)
+				{
+					--inst;
+					if (*inst == '[')
+						--loop_cnt;
+					else if (*inst == ']')
+						++loop_cnt;
+				}
+			}
 		}
+		inst++;
 	}
 
 	free(tshilidzi);
@@ -65,8 +78,8 @@ void	brainfuck_interpreter(const char* instruction, const size_t cnt)
 int		main(int c, char **v)
 {
 	if (c == 2)
-		brainfuck_interpreter(v[1], sizeof(v[1]));
+		brainfuck_interpreter(v[1]);
 	else
-		printf("Invalid number of arguments\n");
+		write(1, "Invalid number of arguments\n", 28);
 	return 0;
 }
